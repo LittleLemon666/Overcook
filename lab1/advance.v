@@ -1,9 +1,16 @@
-module advance(output [7:0] score, input clk, input [9:0] sw, input [2:0] buttom, input enable);
-	
-	reg [7:0] level;
+module advance(output reg [7:0] seg7Out, out reg [3:0] lighting, output endEnable,
+				input clk, input reset, input [3:0] change, input [2:0] buttom, input enable);
 	
 	reg [9:0] counter;
-	parameter counter_max = 1000;
+	reg [1:0] state;
+	reg [7:0] level;
+	reg [3:0] lightsBin [6:0];
+	reg [2:0] lightIndex;
+	parameter LIGHT = 2'b00, APPLY = 2'b01, GOOD = 2'b10, END = 2'b11;
+	parameter GOODSHOW = 255;
+	parameter ENDSHOW = 253;
+	parameter counter_max = 1000; // 0.5s
+	parameter lightMax = 7;
 	
 	always@(posedge clk)
 	begin
@@ -11,11 +18,67 @@ module advance(output [7:0] score, input clk, input [9:0] sw, input [2:0] buttom
 		begin
 			clk_out <= 0;
 			counter <= counter_max;
+			level <= 1;
+			seg7Out <= level;
+			assign endEnable = 0;
+			lightIndex <= 0;
 		end
-		if (counter == 0)
+		if (counter == 0) //action
 		begin
 			counter <= counter_max;
 			clk_out <= ~clk_out;
+			case(state)
+				LIGHT:  //lighting
+				begin
+					lightsBin[lightIndex] <= $random % 10;
+					lighting <= lightsBin[lightIndex];
+					lightIndex <= lightIndex + 1;
+					seg7Out <= level;
+					if (lightIndex == lightMax)
+					begin
+						lightIndex <= 0;
+						state <= APPLY;
+					end
+				end
+				
+				APPLY:  //input what sw be changed
+				begin
+					if (change != 2'b1111)
+					begin
+						if (change == lightsBin[lightIndex])
+						begin
+							lightIndex <= lightIndex + 1;
+						end
+						else
+						begin
+							state <= END;
+						end
+					end
+					
+					if (lightIndex == lightMax)
+					begin
+						lightIndex <= 0;
+						state <= GOOD;
+					end
+				end
+				
+				GOOD:  //show GOOD
+				begin
+					state <= LIGHT;
+					level <= level + 1;
+					seg7Out <= GOODSHOW;
+					lightIndex <= 0;
+				end
+				
+				END:  //show END and
+				begin
+					seg7Out <= ENDSHOW;
+					assign endEnable = 1;
+				end
+				
+				default:
+					state <= 0;
+			endcase
 		end
 		else
 			counter <= counter - 1;
