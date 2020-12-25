@@ -1,9 +1,11 @@
-module my_pll(clk_in, clk_out,reset);
+module my_pll(clk_in, clk_out,max,reset);
 	input reset, clk_in;
-	output clk_out;
-	reg clk_out;
+	input reg [24:0]max;
+	output reg clk_out;
+	//reg clk_out;
 	reg [24:0] counter;
-	parameter counter_max = 250_000;
+	 
+	parameter counter_max = max;
 
 	always@ (posedge clk_in)
 	begin
