@@ -1,10 +1,11 @@
-module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg [3:0] lighting, output reg endEnable,	input clk, input reset, input [3:0] change, input [2:0] buttom, input enable , output reg[1:0]  nextdifficulty, output reg max,output reg clk_out);
+module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg [3:0] lighting, output reg endEnable,	input clk, input [3:0] change, input [2:0] buttom, input enable , output reg[1:0]  nextdifficulty, output reg max,output reg clk_out);
 	reg [9:0] counter;
 	reg [1:0] state;
 	reg [7:0] level;
 	reg [3:0] lightsBin [6:0];
 	reg [2:0] lightIndex;
 	reg [1:0] difficulty ;
+	
 	parameter LIGHT = 2'b00, APPLY = 2'b01, GOOD = 2'b10, END = 2'b11;
 	parameter GOODSHOW = 255;
 	parameter ENDSHOW = 253;
@@ -13,7 +14,8 @@ module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 	
 	always@(posedge clk)
 	begin
-		if(reset)
+	
+		if(buttom[0])
 		begin
 			clk_out <= 0;
 			counter <= counter_max;
