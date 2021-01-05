@@ -1,5 +1,4 @@
-module advance( input [1:0]lastdifficuty , output reg [7:0] seg7Out, out reg [3:0] lighting, output endEnable,
-				input clk, input reset, input [3:0] change, input [2:0] buttom, input enable , output nextdiffucluty, output max);
+module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg [3:0] lighting, output reg endEnable,	input clk, input reset, input [3:0] change, input [2:0] buttom, input enable , output reg[1:0]  nextdifficulty, output reg max,output reg clk_out);
 	reg [9:0] counter;
 	reg [1:0] state;
 	reg [7:0] level;
@@ -36,18 +35,14 @@ module advance( input [1:0]lastdifficuty , output reg [7:0] seg7Out, out reg [3:
 					case(difficulty )
 					00://
 						max <=17500000; 
-						lightMax<=4;
 					01:
 						max <=15000000; 
-						lightMax<=5;
 					02:
 						max <=12500000; 
-						lightMax<=6;
 					03:				
 						max <=10000000; 
-						lightMax<=7;
-
-					lightsBin[lightIndex] <= $random % 10;
+					endcase
+					lightsBin[lightIndex] <= $random  % 10;
 					lighting <= lightsBin[lightIndex];
 					lightIndex <= lightIndex + 1;
 					seg7Out <= level;
@@ -60,7 +55,7 @@ module advance( input [1:0]lastdifficuty , output reg [7:0] seg7Out, out reg [3:
 				
 				APPLY:  //input what sw be changed
 				begin
-					if (change != 2'b1111)
+					if (change != 4'b1111)
 					begin
 						if (change == lightsBin[lightIndex])
 						begin
