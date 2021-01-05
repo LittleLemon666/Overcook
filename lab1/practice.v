@@ -36,12 +36,16 @@ module advance( input [1:0]lastdifficuty , output reg [7:0] seg7Out, out reg [3:
 					case(difficulty )
 					00://
 						max <=17500000; 
+						lightMax<=4;
 					01:
 						max <=15000000; 
+						lightMax<=5;
 					02:
 						max <=12500000; 
+						lightMax<=6;
 					03:				
 						max <=10000000; 
+						lightMax<=7;
 
 					lightsBin[lightIndex] <= $random % 10;
 					lighting <= lightsBin[lightIndex];
