@@ -12,6 +12,8 @@ module remember(reset, good,clk,difficulty,SW,memory,preSW);
 	output [4:0]light;
 	reg [31;0]Seg;
 	int i=0;
+	output success;
+	
 	
 	always @(reset)
 	begin 
@@ -36,7 +38,7 @@ module remember(reset, good,clk,difficulty,SW,memory,preSW);
 				}
 				else if(memory[change]!=i)
 				{
-					i = 0;
+					i <= 0;
 					
 				}
 				else
@@ -45,6 +47,7 @@ module remember(reset, good,clk,difficulty,SW,memory,preSW);
 				}
 		
 	end
+	//level 255 good
 	
 	always @(difficulty)
 	begin
