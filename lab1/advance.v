@@ -1,5 +1,5 @@
 module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg endEnable,
-				input clk, input reset, input [3:0] change, input [2:0] buttom, input enable);
+				input clk, input reset, input [3:0] change, input enable);
 	
 	reg [9:0] counter; //for divide clk
 	reg [1:0] state; //state in advance.v
