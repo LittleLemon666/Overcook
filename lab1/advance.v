@@ -1,5 +1,5 @@
 module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg endEnable,
-				input clk, input reset, input [3:0] change, input enable);
+				input clk, input [3:0] change, input enable);
 	
 	reg [9:0] counter; //for divide clk
 	reg [1:0] state; //state in advance.v
@@ -12,16 +12,17 @@ module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg e
 	parameter counter_max = 1000; // 0.5s
 	parameter lightMax = 7;
 	
+	always@(posedge enable)
+	begin
+		counter <= counter_max;
+		level <= 1; //level is 1 in the beginning
+		seg7Out <= level; //seg7 show level
+		endEnable <= 0; //lock END.v
+		lightIndex <= 0; //reset leds cache
+	end
+	
 	always@(posedge clk)
 	begin
-		if(reset)
-		begin
-			counter <= counter_max;
-			level <= 1; //level is 1 in the beginning
-			seg7Out <= level; //seg7 show level
-			endEnable <= 0; //lock END.v
-			lightIndex <= 0; //reset leds cache
-		end
 		if (counter == 0) //action
 		begin
 			counter <= counter_max;
