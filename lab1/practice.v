@@ -1,4 +1,4 @@
-module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg [3:0] lighting, output reg endEnable,	input clk, input [3:0] change, input [2:0] buttom, input enable , output reg[1:0]  nextdifficulty, output reg max,output reg clk_out);
+module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg [3:0] lighting, output reg endEnable,	input clk, input [3:0] change, input [2:0] buttom, input enable , output reg[1:0]  nextdifficulty, output reg [24:0]max,output reg clk_out);
 	reg [9:0] counter;
 	reg [1:0] state;
 	reg [7:0] level;
