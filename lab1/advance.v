@@ -1,5 +1,5 @@
-module advance(output reg [7:0] seg7Out, out reg [3:0] lighting, output endEnable,
-				input clk, input reset, input [3:0] change, input [2:0] buttom, input enable);
+module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg endEnable,
+				input clk, input reset, input [3:0] change, input enable);
 	
 	reg [9:0] counter; //for divide clk
 	reg [1:0] state; //state in advance.v
@@ -19,7 +19,7 @@ module advance(output reg [7:0] seg7Out, out reg [3:0] lighting, output endEnabl
 			counter <= counter_max;
 			level <= 1; //level is 1 in the beginning
 			seg7Out <= level; //seg7 show level
-			assign endEnable = 0; //lock END.v
+			endEnable <= 0; //lock END.v
 			lightIndex <= 0; //reset leds cache
 		end
 		if (counter == 0) //action
@@ -41,7 +41,7 @@ module advance(output reg [7:0] seg7Out, out reg [3:0] lighting, output endEnabl
 				
 				APPLY:  //input what sw be changed
 				begin
-					if (change != 2'b1111)
+					if (change != 4'b1111) //recieve SWs is not default
 					begin
 						if (change == lightsBin[lightIndex])
 						begin
@@ -71,7 +71,7 @@ module advance(output reg [7:0] seg7Out, out reg [3:0] lighting, output endEnabl
 				END:  //show END and
 				begin
 					seg7Out <= ENDSHOW; //show END on seg7
-					assign endEnable = 1; //enable END.v
+					endEnable <= 1; //enable END.v
 				end
 				
 				default:
