@@ -17,7 +17,7 @@ module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 	
 		if(buttom[0])
 		begin
-			clk_out <= 0;
+			//clk_out <=clk ;
 			counter <= counter_max;
 			level <= 1;
 			seg7Out <= level;
@@ -27,7 +27,7 @@ module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 		if (counter == 0) //action
 		begin
 			counter <= counter_max;
-			clk_out <= ~clk_out;
+			//clk_out <= ~clk_out;
 			case(state)
 				LIGHT:  //lighting
 				begin
