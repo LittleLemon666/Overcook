@@ -1,6 +1,6 @@
 module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg endEnable,input clk, input [3:0] change, input enable);
 	
-	reg [9:0] counter; //for divide clk
+	reg [19:0] counter; //for divide clk
 	reg [1:0] state; //state in advance.v
 	reg [7:0] level; //your level now
 	reg [3:0] lightsBin [6:0]; //store what LEDs light
