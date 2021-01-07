@@ -1,4 +1,4 @@
-module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg [3:0] lighting, output reg endEnable,	input clk, input [3:0] change, input [2:0] buttom, input enable , output reg[1:0]  nextdifficulty, output reg [24:0]max,output reg clk_out,output reg start);
+module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg [3:0] lighting, output reg endEnable,	input clk, input [3:0] change, input enable , output reg[1:0]  nextdifficulty);
 	reg [9:0] counter;
 	reg [2:0] state;
 	reg [7:0] level;
@@ -12,28 +12,22 @@ module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 	parameter LIGHT = 3'b000, APPLY = 3'b001, GOOD = 3'b010, END = 3'b011 , BURN = 3'b100;
 	parameter GOODSHOW = 255;
 	parameter ENDSHOW = 253;
-	//parameter counter_max = 1000; // 0.5s
 	parameter lightMax = 7;
 	assign feedback_value = r_reg[3] ^ r_reg[2] ^ r_reg[0]; //for random
 	assign r_next = {feedback_value, r_reg[3:1]}; //for random
 	
 	always@(posedge clk)
 	begin
-	
 	//reset
-		if(buttom[0])
+		if(enable == 1'b0)
 		begin
-			//clk_out <=clk ;
-			//counter <= counter_max;
 			level <= 1;
 			seg7Out <= level;
-			assign endEnable = 0;
+			endEnable <= 0;
 			lightIndex <= 0;
 		end
 		else
 			begin
-			//counter <= counter_max;
-			//clk_out <= ~clk_out;
 				case(state)
 					LIGHT:  //lighting
 					begin
@@ -65,14 +59,21 @@ module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 							begin
 								state <= END;
 							end
-							
+						end
+						else
+						begin
+							state<=state;
 						end
 						
 						if (lightIndex == lightMax)
-							begin
-								lightIndex <= 0;
-								state <= GOOD;
-							end			
+						begin
+							lightIndex <= 0;
+							state <= GOOD;
+						end
+						else
+						begin
+							state<=state;
+						end
 					end
 					
 					GOOD:  //show GOOD
@@ -89,7 +90,7 @@ module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 					END:  //show END and
 					begin
 						seg7Out <= ENDSHOW;
-						assign endEnable = 1;
+						endEnable <= 1;
 					end
 					
 					BURN:

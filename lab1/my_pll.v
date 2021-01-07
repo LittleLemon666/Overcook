@@ -16,14 +16,13 @@ module my_pll(clk_in, clk_out,difficluty,reset,light);
 		end
 		
 		if(light==0)
-		{
+		begin
 			//clk_out <= 1 ;
-			countermax_ = 1;
-		}
+			counter_max = 1;
+		end
 		else
-		{
+		begin
 				case(difficluty)
-		
 				00:
 					counter_max = 1000000;
 				01:
@@ -33,14 +32,17 @@ module my_pll(clk_in, clk_out,difficluty,reset,light);
 				11:
 					counter_max = 1750000;
 				endcase
-		}	
-			if (counter == 0)
-			begin
-				counter <= counter_max;
-				clk_out <= ~clk_out;
-			end
-			else
-				counter <= counter - 1;
+		end	
+		
+		if (counter == 0)
+		begin
+			counter <= counter_max;
+			clk_out <= ~clk_out;
+		end
+		else
+		begin
+			counter <= counter - 1;
+		end
 		
 	end
 endmodule
