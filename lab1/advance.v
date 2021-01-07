@@ -33,6 +33,7 @@ module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg e
 			lightIndex <= 0; //reset leds cache
 			state <= 2'b00;
 			lightIndexChange <= 0;
+			lighting <= 0;
 		end
 		else
 		begin
