@@ -41,6 +41,20 @@ module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg e
 			begin
 				lightIndexChange = 2;
 			end
+			else
+			begin
+				if(lightIndexChange == 2)
+				begin
+					lightIndexChange = 0;
+					lightIndex <= lightIndex + 1; //LEDs cache index++
+					seg7Out <= level; //show your level now
+					if (lightIndex == lightMax) //after 7 of lights
+					begin
+						lightIndex <= 0; //from cache 0
+						state <= APPLY; //start to recieve player sw
+					end
+				end
+			end
 			if (counter == 0) //action
 			begin
 				counter <= counter_max;
@@ -101,21 +115,6 @@ module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg e
 		else
 		begin
 			lighting <= lighting;
-		end
-	end
-	
-	always@(lightIndexChange)
-	begin
-		if(lightIndexChange == 2)
-		begin
-			lightIndexChange = 0;
-			lightIndex <= lightIndex + 1; //LEDs cache index++
-			seg7Out <= level; //show your level now
-			if (lightIndex == lightMax) //after 7 of lights
-			begin
-				lightIndex <= 0; //from cache 0
-				state <= APPLY; //start to recieve player sw
-			end
 		end
 	end
 	
