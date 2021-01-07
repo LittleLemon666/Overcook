@@ -11,7 +11,7 @@ module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg e
 	parameter LIGHT = 2'b00, APPLY = 2'b01, GOOD = 2'b10, END = 2'b11; //state in advance.v
 	parameter GOODSHOW = 255;
 	parameter ENDSHOW = 253;
-	parameter counter_max = 1000; // 0.5s
+	parameter counter_max = 1000000; // 0.5s
 	parameter lightMax = 7;
 	
 	// rand_num_generator
@@ -54,23 +54,6 @@ module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg e
 					
 					APPLY:  //input what sw be changed
 					begin
-						if (change != 4'b1111) //recieve SWs is not default
-						begin
-							if (change == lightsBin[lightIndex])
-							begin
-								lightIndex <= lightIndex + 1; //correct!
-							end
-							else
-							begin
-								state <= END; //see you next time
-							end
-						end
-						
-						if (lightIndex == lightMax) //all correct!
-						begin
-							lightIndex <= 0; //reset leds cache
-							state <= GOOD;
-						end
 					end
 					
 					GOOD:  //show GOOD
@@ -98,4 +81,27 @@ module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg e
 		end
 	end
 	
+	always@(change)
+	begin
+		if (state == APPLY) //input what sw be changed
+		begin
+			if (change != 4'b1111) //recieve SWs is not default
+			begin
+				if (change == lightsBin[lightIndex])
+				begin
+					lightIndex <= lightIndex + 1; //correct!
+				end
+				else
+				begin
+					state <= END; //see you next time
+				end
+			end
+			
+			if (lightIndex == lightMax) //all correct!
+			begin
+				lightIndex <= 0; //reset leds cache
+				state <= GOOD;
+			end
+		end
+	end
 endmodule
