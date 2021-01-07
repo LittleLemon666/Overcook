@@ -14,6 +14,11 @@ module Seg7Decode (num, seg7Decode);
 			7 : seg7Decode = 8'b11011000; // 7
 			8 : seg7Decode = 8'b10000000; // 8
 			9 : seg7Decode = 8'b10010000; // 9
+			10: seg7Decode = 8'b10010000; // g
+			11: seg7Decode = 8'b10100011; // o
+			12: seg7Decode = 8'b10100001; // d
+			13: seg7Decode = 8'b10000110; // E
+			14: seg7Decode = 8'b10101011; // n
 			default :
 				seg7Decode = 8'b11111111;
 		endcase
