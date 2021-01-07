@@ -1,104 +1,111 @@
-module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg [3:0] lighting, output reg endEnable,	input clk, input [3:0] change, input [2:0] buttom, input enable , output reg[1:0]  nextdifficulty, output reg [24:0]max,output reg clk_out);
+module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg [3:0] lighting, output reg endEnable,	input clk, input [3:0] change, input [2:0] buttom, input enable , output reg[1:0]  nextdifficulty, output reg [24:0]max,output reg clk_out,output reg start);
 	reg [9:0] counter;
-	reg [1:0] state;
+	reg [2:0] state;
 	reg [7:0] level;
+	reg [3:0] r_reg;
 	reg [3:0] lightsBin [6:0];
 	reg [2:0] lightIndex;
 	reg [1:0] difficulty ;
+	wire [3:0] r_next; //random given
+	wire feedback_value;
 	
-	parameter LIGHT = 2'b00, APPLY = 2'b01, GOOD = 2'b10, END = 2'b11;
+	parameter LIGHT = 3'b000, APPLY = 3'b001, GOOD = 3'b010, END = 3'b011 , BURN = 3'b100;
 	parameter GOODSHOW = 255;
 	parameter ENDSHOW = 253;
-	parameter counter_max = 1000; // 0.5s
+	//parameter counter_max = 1000; // 0.5s
 	parameter lightMax = 7;
+	assign feedback_value = r_reg[3] ^ r_reg[2] ^ r_reg[0]; //for random
+	assign r_next = {feedback_value, r_reg[3:1]}; //for random
 	
 	always@(posedge clk)
 	begin
 	
+	//reset
 		if(buttom[0])
 		begin
 			//clk_out <=clk ;
-			counter <= counter_max;
+			//counter <= counter_max;
 			level <= 1;
 			seg7Out <= level;
 			assign endEnable = 0;
 			lightIndex <= 0;
 		end
-		if (counter == 0) //action
-		begin
-			counter <= counter_max;
+		else
+			begin
+			//counter <= counter_max;
 			//clk_out <= ~clk_out;
-			case(state)
-				LIGHT:  //lighting
-				begin
-					difficulty <=lastdifficuty ;
-
-					//改clk
-					case(difficulty )
-					00://
-						max <=17500000; 
-					01:
-						max <=15000000; 
-					02:
-						max <=12500000; 
-					03:				
-						max <=10000000; 
-					endcase
-					lightsBin[lightIndex] <= $random  % 10;
-					lighting <= lightsBin[lightIndex];
-					lightIndex <= lightIndex + 1;
-					seg7Out <= level;
-					if (lightIndex == lightMax)
+				case(state)
+					LIGHT:  //lighting
 					begin
-						lightIndex <= 0;
-						state <= APPLY;
-					end
-				end
-				
-				APPLY:  //input what sw be changed
-				begin
-					if (change != 4'b1111)
-					begin
-						if (change == lightsBin[lightIndex])
+						difficulty <=lastdifficuty ;
+						r_reg <= r_next; //random the index of light
+						lightsBin[lightIndex] <= r_reg;
+						lighting <= lightsBin[lightIndex];
+						lightIndex <= lightIndex + 1;
+						seg7Out <= level;
+						if (lightIndex == lightMax)
 						begin
-							lightIndex <= lightIndex + 1;
-						end
-						else
-						begin
-							state <= END;
+							lightIndex <= 0;
+							state <= APPLY;
 						end
 					end
 					
-					if (lightIndex == lightMax)
+					APPLY:  //input what sw be changed
 					begin
-						lightIndex <= 0;
-						state <= GOOD;
+						if (change != 4'b1111)
+						begin
+							if (change == lightsBin[lightIndex])					
+								begin
+									lightIndex <= lightIndex + 1;
+								end
+							else
+								state<=BURN;
+								
+							if(level ==10)
+							begin
+								state <= END;
+							end
+							
+						end
+						
+						if (lightIndex == lightMax)
+							begin
+								lightIndex <= 0;
+								state <= GOOD;
+							end			
 					end
-				end
-				
-				GOOD:  //show GOOD
-				begin
-					state <= LIGHT;
-					level <= level + 1;
-					seg7Out <= GOODSHOW;
-					lightIndex <= 0;
-					difficulty <=difficulty +1;
-					nextdifficulty <=difficulty; 
+					
+					GOOD:  //show GOOD
+					begin
+						state <= LIGHT;
+						level <= level + 1;
+						seg7Out <= GOODSHOW;
+						lightIndex <= 0;
+						difficulty <=difficulty +1;
+						nextdifficulty <=difficulty; 
 
-				end
-				
-				END:  //show END and
-				begin
-					seg7Out <= ENDSHOW;
-					assign endEnable = 1;
-				end
-				
-				default:
-					state <= 0;
-			endcase
+					end
+					
+					END:  //show END and
+					begin
+						seg7Out <= ENDSHOW;
+						assign endEnable = 1;
+					end
+					
+					BURN:
+					begin
+						state <= LIGHT;
+						seg7Out <= ENDSHOW;
+						difficulty <=difficulty -1;
+						nextdifficulty <=difficulty; 
+					end
+					
+					default:
+						state <= 0;
+				endcase
+			end
+			//else
+			//	counter <= counter - 1;
 		end
-		else
-			counter <= counter - 1;
-	end
 	
 endmodule
