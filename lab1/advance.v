@@ -4,8 +4,7 @@ module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg e
 	reg [1:0] state; //state in advance.v
 	reg [7:0] level; //your level now
 	reg [3:0] lightsBin [6:0]; //store what LEDs light
-	wire [3:0] r_next; //random given
-	wire feedback_value;
+	reg feedback_value; //random given
 	reg [2:0] lightIndex; //index of LEDs cache
 	reg [1:0] lightIndexChange;
 	parameter LIGHT = 2'b00, APPLY = 2'b01, GOOD = 2'b10, END = 2'b11; //state in advance.v
@@ -13,9 +12,18 @@ module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg e
 	parameter ENDSHOW = 253;
 	parameter counter_max = 12_500_000; // 0.5s
 	parameter lightMax = 7;
+	reg [2:0] iteral;
 	
-	assign feedback_value = lightsBin[lightIndex][3] ^ lightsBin[lightIndex][2] ^ lightsBin[lightIndex][0]; //for random
-	assign r_next = {feedback_value, lightsBin[lightIndex][3:1]}; //for random
+	initial
+	begin
+		lightsBin[0] <= 1;
+		lightsBin[1] <= 2;
+		lightsBin[2] <= 3;
+		lightsBin[3] <= 4;
+		lightsBin[4] <= 5;
+		lightsBin[5] <= 6;
+		lightsBin[6] <= 7;
+	end
 	
 	always@(posedge clk)
 	begin
@@ -28,6 +36,7 @@ module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg e
 			lightIndex <= 0; //reset leds cache
 			state <= 2'b00;
 			lighting <= 4'b1111;
+			iteral <= 0;
 		end
 		else
 		begin
@@ -39,21 +48,18 @@ module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg e
 					begin
 					if(lighting == 4'b1111)
 					begin
-						lightsBin[lightIndex] <= r_next;
-						lighting <= lightsBin[lightIndex]; //LEDs light the cache "lightsBin[lightIndex]"
-						lightIndex <= lightIndex + 1; //LEDs cache index++
-						seg7Out <= level; //show your level now
-						if (lightIndex == lightMax) //after 7 of lights
+						if (iteral == 0) iteral <= 1;
+						else
 						begin
-							lightIndex <= 0; //from cache 0
-							state <= APPLY; //start to recieve player sw
-							lighting <= 4'b1111;
+							if (iteral == 5)
+							begin
+								lightIndex <= lightIndex + 1; //LEDs cache index++
+								seg7Out <= level; //show your level now
+								iteral <= 6;
+							end
 						end
 					end
-					else
-					begin
-						lighting <= 4'b1111;
-					end
+					else lighting <= 4'b1111;
 						
 					end
 					GOOD:  //show GOOD
@@ -82,6 +88,45 @@ module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg e
 			else
 			begin
 				counter <= counter - 1;
+				if (state == LIGHT)
+				begin
+					case (iteral)
+						1:
+						begin
+							feedback_value <= lightsBin[lightIndex][3] ^ lightsBin[lightIndex][2] ^ lightsBin[lightIndex][0]; //for random
+							iteral <= 2;
+						end
+						
+						2:
+						begin
+							lightsBin[lightIndex] <= {feedback_value, lightsBin[(lightIndex + 6) % 7][3:1]}; //for random
+							iteral <= 3;
+						end
+						
+						3:
+						begin
+							lightsBin[lightIndex] <= (lightsBin[lightIndex] * 2) % 10;
+							iteral <= 4;
+						end
+						
+						4:
+						begin
+							lighting <= lightsBin[lightIndex]; //LEDs light the cache "lightsBin[lightIndex]"
+							iteral <= 5;
+						end
+						
+						6:
+						begin
+							if (lightIndex == lightMax) //after 7 of lights
+							begin
+								lightIndex <= 0; //from cache 0
+								state <= APPLY; //start to recieve player sw
+								lighting <= 4'b1111;
+							end
+							else iteral <= 0;
+						end
+					endcase
+				end
 			end
 		end
 		
@@ -93,12 +138,14 @@ module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg e
 				if (change == lightsBin[lightIndex])
 				begin
 					lightIndex <= lightIndex + 1; //correct!
-					lighting <= change;
+					lighting <= change; //show you press
 				end
 				else
 				begin
 					lighting <= change;
 					state <= END; //see you next time
+					counter <= 50_000_000;
+					iteral <= 7;
 				end
 			end
 			
@@ -106,7 +153,15 @@ module advance(output reg [7:0] seg7Out, output reg [3:0] lighting, output reg e
 			begin
 				lightIndex <= 0; //reset leds cache
 				state <= GOOD;
+				iteral <= 0;
 			end
+		end
+		
+		if (state == END && counter == 0 && iteral == 7)
+		begin
+			if (seg7Out == ENDSHOW) seg7Out <= level;
+			else seg7Out <= ENDSHOW;
+			counter <= 50_000_000;
 		end
 	end
 	
