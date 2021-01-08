@@ -1,112 +1,191 @@
-module practice( input [1:0]lastdifficuty , output reg [7:0] seg7Out, output reg [3:0] lighting, output reg endEnable,	input clk, input [3:0] change, input enable , output reg[1:0]  nextdifficulty);
+module practice( input [2:0]lastdifficuty , output reg [7:0] seg7Out, output reg [3:0] lighting, output reg endEnable,	input clk, input [3:0] change, input enable , output reg[2:0]  nextdifficulty);
 	reg [9:0] counter;
 	reg [2:0] state;
 	reg [7:0] level;
 	reg [3:0] r_reg;
 	reg [3:0] lightsBin [6:0];
 	reg [2:0] lightIndex;
-	reg [1:0] difficulty ;
-	wire [3:0] r_next; //random given
-	wire feedback_value;
+	reg [2:0] difficulty ;
+	
+	reg feedback_value;
+	reg [2:0] iteral;
 	
 	parameter LIGHT = 3'b000, APPLY = 3'b001, GOOD = 3'b010, END = 3'b011 , BURN = 3'b100;
 	parameter GOODSHOW = 255;
 	parameter ENDSHOW = 253;
 	parameter lightMax = 7;
-	assign feedback_value = r_reg[3] ^ r_reg[2] ^ r_reg[0]; //for random
-	assign r_next = {feedback_value, r_reg[3:1]}; //for random
+	//assign feedback_value = r_reg[3] ^ r_reg[2] ^ r_reg[0]; //for random
+	initial
+		begin
+			lightsBin[0] <= 1;
+			lightsBin[1] <= 2;
+			lightsBin[2] <= 3;
+			lightsBin[3] <= 4;
+			lightsBin[4] <= 5;
+			lightsBin[5] <= 6;
+			lightsBin[6] <= 7;
+		end
 	
 	always@(posedge clk)
 	begin
 	//reset
-		if(enable == 1'b0)
+		if(enable == 0)
 		begin
 			level <= 1;
 			seg7Out <= level;
 			endEnable <= 0;
 			lightIndex <= 0;
+			state <= 0;
+			lighting <= 4'b1111;
+			iteral <= 0;
 		end
 		else
 			begin
 				case(state)
 					LIGHT:  //lighting
 					begin
-						difficulty <=lastdifficuty ;
-						r_reg <= r_next; //random the index of light
-						lightsBin[lightIndex] <= r_reg;
-						lighting <= lightsBin[lightIndex];
-						lightIndex <= lightIndex + 1;
-						seg7Out <= level;
-						if (lightIndex == lightMax)
-						begin
-							lightIndex <= 0;
-							state <= APPLY;
-						end
-					end
-					
-					APPLY:  //input what sw be changed
-					begin
-						if (change != 4'b1111)
-						begin
-							if (change == lightsBin[lightIndex])					
-								begin
-									lightIndex <= lightIndex + 1;
-								end
-							else
-								state<=BURN;
-								
-							if(level ==10)
+						if(difficulty!=4)//==0 || difficulty==1 || difficulty==2 || difficulty==3||difficulty==5)
 							begin
-								state <= END;
+								
+								if (iteral == 0) 
+								begin 
+									iteral <= 1;
+									difficulty =4;
+								end
+								else
+									begin
+										if (iteral == 5)
+										begin
+											lightIndex <= lightIndex + 1; //LEDs cache index++
+											//lighting
+											seg7Out <= level; //show your level now
+											iteral <= 6;
+											difficulty =4;
+										end
+									end
 							end
-						end
 						else
 						begin
-							state<=state;
+							case (iteral)
+								1:
+								begin
+									feedback_value <= lightsBin[lightIndex][3] ^ lightsBin[lightIndex][2] ^ lightsBin[lightIndex][0]; //for random
+									iteral <= 2;
+								end
+								
+								2:
+								begin
+									lightsBin[lightIndex] <= {feedback_value, lightsBin[(lightIndex + 6) % 7][3:1]}; //for random
+									iteral <= 3;
+								end
+								
+								3:
+								begin
+									lightsBin[lightIndex] <= (lightsBin[lightIndex] * 2) % 10;
+									iteral <= 4;
+								end
+								
+								4:
+								begin
+									lighting <= lightsBin[lightIndex]; //LEDs light the cache "lightsBin[lightIndex]"
+									iteral <= 5;
+									difficulty = 5 ;//改速度
+								end
+								
+								6:
+								begin
+									if (lightIndex == lightMax) //after 7 of lights
+										begin
+											lightIndex <= 0; //from cache 0
+											state <= APPLY; //start to recieve player sw
+											lighting <= 4'b1111;
+											difficulty <= 4;
+										end
+									else
+										begin
+											iteral <= 0;
+											lighting <= 15;
+											difficulty <=0;
+										end
+								end
+								
+							endcase
 						end
+
 						
-						if (lightIndex == lightMax)
-						begin
-							lightIndex <= 0;
-							state <= GOOD;
-						end
-						else
-						begin
-							state<=state;
-						end
-					end
-					
+	
+					end	
 					GOOD:  //show GOOD
 					begin
 						state <= LIGHT;
 						level <= level + 1;
 						seg7Out <= GOODSHOW;
 						lightIndex <= 0;
-						difficulty <=difficulty +1;
+						difficulty <=nextdifficulty +1;
 						nextdifficulty <=difficulty; 
-
+						if (level == 11)
+						begin
+							//lightIndex <= 0;
+							state <= END;
+							//lighting <= 4'b1111;
+						end
 					end
 					
 					END:  //show END and
 					begin
 						seg7Out <= ENDSHOW;
 						endEnable <= 1;
+						lighting <= 4'b1111;
 					end
 					
 					BURN:
 					begin
-						state <= LIGHT;
-						seg7Out <= ENDSHOW;
-						difficulty <=difficulty -1;
-						nextdifficulty <=difficulty; 
+					if(level ==10)
+						begin
+							state <= END;
+						end
+					else
+						begin
+							state <= LIGHT;
+							seg7Out <= ENDSHOW;
+							difficulty <=nextdifficulty -1;
+							nextdifficulty <=difficulty; 
+						end
+						
 					end
 					
+					APPLY:
+						begin
+						
+						if(lighting !=10)
+						//	lighting	= light
+							//lighting <= change;
+							if (change != 4'b1111) //recieve SWs is not default
+								begin
+									if (change == lightsBin[lightIndex])
+										begin
+											lightIndex <= lightIndex + 1; //correct!
+											lighting <= change;
+										end
+									else
+										begin
+											lighting <= change;
+											state <= END; //see you next time
+										end
+								end
+									
+								if (lightIndex == lightMax) //all correct!
+									begin
+										lightIndex <= 0; //reset leds cache
+										difficulty <= lastdifficuty;
+										state <= GOOD;
+									end
+						end
 					default:
-						state <= 0;
+						state <= state;
 				endcase
 			end
-			//else
-			//	counter <= counter - 1;
-		end
-	
-endmodule
+			
+		
+	end
+endmodule	
