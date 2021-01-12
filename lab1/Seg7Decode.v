@@ -1,5 +1,5 @@
 module Seg7Decode (num, seg7Decode);
-	input [3:0] num;
+	input [4:0] num;
 	output reg [7:0] seg7Decode;	
 	always @(num)
 	begin
@@ -19,6 +19,9 @@ module Seg7Decode (num, seg7Decode);
 			12: seg7Decode = 8'b10100001; // d
 			13: seg7Decode = 8'b10000110; // E
 			14: seg7Decode = 8'b10101011; // n
+			15: seg7Decode = 8'b10000011; // b
+			16: seg7Decode = 8'b11100011; // u
+			17: seg7Decode = 8'b10101111; // r
 			default :
 				seg7Decode = 8'b11111111;
 		endcase

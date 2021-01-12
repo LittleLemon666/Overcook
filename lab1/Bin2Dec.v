@@ -1,7 +1,7 @@
 module Bin2Dec (Sw, Seg7);
 	input [31:0] Sw;
 	output [31:0] Seg7;
-	reg [3:0] n0, n1, n2, n3;
+	reg [4:0] n0, n1, n2, n3;
 	
 	Seg7Decode s0 (n0, Seg7 [7:0]);
 	Seg7Decode s1 (n1, Seg7 [15:8]);
@@ -19,10 +19,17 @@ module Bin2Dec (Sw, Seg7);
 		end
 		else if(Sw == 253)
 		begin
-			n3 = 15;
+			n3 = 18;
 			n2 = 13;
 			n1 = 14;
 			n0 = 12;
+		end
+		else if(Sw == 254)
+		begin
+			n3 = 15;
+			n2 = 16;
+			n1 = 17;
+			n0 = 14;
 		end
 		else
 		begin
