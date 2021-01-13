@@ -34,38 +34,12 @@ module start(sw_out, advance, particle,reset, sw_in, in_advance, in_particle,in_
 	begin
 		seg = 32'b00000000000000000000010001010111;
 		previours_buttom = 3'b000;
-		{particle,advance,reset} = 3'b000;
+		advance = 0;
+		particle = 0;
+		reset = 0;
 	end
 	
 	assign data = seg;
-	
-	
-	always@ (buttom_reg)
-	begin
-	if(buttom_reg[2] == 1'b1)
-	begin
-		previours_buttom = 3'b000;
-	end
-	else
-	begin
-		if(buttom_reg[1] == 1'b1 && previours_buttom != 3'b010 )
-		begin
-			previours_buttom = 3'b100;
-		end
-		else if(buttom_reg[0] == 1'b1 && previours_buttom != 3'b100 )
-		begin
-			previours_buttom = 3'b010;
-		end
-		else
-		begin
-			previours_buttom = previours_buttom;
-		end
-	end
-	
-	{particle,advance,reset} = previours_buttom;
-	
-	end
-	
 	
 	always@ (posedge clk)
 	begin
@@ -83,6 +57,28 @@ module start(sw_out, advance, particle,reset, sw_in, in_advance, in_particle,in_
 		end
 		else
 			counter = counter - 1;
+		
+		if(buttom_reg[2] == 1'b1)
+		begin
+			previours_buttom = 3'b000;
+		end
+		else
+		begin
+			if(buttom_reg[1] == 1'b1 && previours_buttom != 3'b010 )
+			begin
+				previours_buttom = 3'b100;
+			end
+			else if(buttom_reg[0] == 1'b1 && previours_buttom != 3'b100 )
+			begin
+				previours_buttom = 3'b010;
+			end
+			else
+			begin
+				previours_buttom = previours_buttom;
+			end
+		end
+		
+		{particle,advance,reset} = previours_buttom;
 		
 	end
 	

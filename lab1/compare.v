@@ -136,7 +136,7 @@ module compare( one_input, two_input, change,clk,reset,advance,practicle);
 			end
 			else  
 			begin
-				change <= change;
+				change <= 4'b1111;
 			end
 		end
 	end

@@ -16,8 +16,8 @@ module light_DECODE(light_advance,light_practice,sel_1,sel_0 , light_out );
 	begin
 		case({sel_1,sel_0})
 			0: data = 4'b1111;
-			1: data = light_advance;
-			2: data = light_practice;
+			2: data = light_advance;
+			1: data = light_practice;
 			default: data = 4'b1111;
 		endcase
 	end

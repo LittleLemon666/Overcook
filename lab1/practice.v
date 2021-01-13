@@ -20,17 +20,27 @@ module practice( input [2:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 	//assign feedback_value = r_reg[3] ^ r_reg[2] ^ r_reg[0]; //for random
 	initial
 		begin
-			lightsBin[0] <= 1;
-			lightsBin[1] <= 2;
-			lightsBin[2] <= 3;
+			lightsBin[0] <= 7;
+			lightsBin[1] <= 6;
+			lightsBin[2] <= 5;
 			lightsBin[3] <= 4;
-			lightsBin[4] <= 5;
-			lightsBin[5] <= 6;
-			lightsBin[6] <= 7;
+			lightsBin[4] <= 3;
+			lightsBin[5] <= 2;
+			lightsBin[6] <= 1;
 			lastchange<=15;
 			total<=0;
 			in <= 1;
-			state<=0;
+			lighting<=1;
+			difficulty <=1; 
+			nextdifficulty<=1;
+			level <= 1;
+			seg7Out <= level;
+			endEnable <= 0;
+			lightIndex <= 0;
+			state <= 0;
+			lighting <= 4'b1111;
+			iteral <= 0;
+			lightMax<= 5;
 		end
 	always@(change)
 		begin
@@ -95,18 +105,20 @@ module practice( input [2:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 								1:
 								begin
 									feedback_value <= lightsBin[lightIndex][3] ^ lightsBin[lightIndex][2] ^ lightsBin[lightIndex][0]; //for random
+									lightsBin[lightIndex] <= {feedback_value, lightsBin[lightIndex][2:0]}; //for random
 									iteral <= 2;
 								end
 								
 								2:
 								begin
 									lightsBin[lightIndex] <= {feedback_value, lightsBin[(lightIndex + 6) % 7][3:1]}; //for random
+									lightsBin[lightIndex] <= {feedback_value, lightsBin[lightIndex][3:1]}; //for random
 									iteral <= 3;
 								end
 								
 								3:
 								begin
-									lightsBin[lightIndex] <= (lightsBin[lightIndex] * 2) % 10;
+									lightsBin[lightIndex] <= (lightsBin[lightIndex] * 3) % 10;
 									iteral <= 4;
 								end
 								
@@ -159,7 +171,7 @@ module practice( input [2:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 							
 							
 							nextdifficulty <=difficulty; 
-						if (total == 11)
+						if (total == 10)
 						begin
 							//lightIndex <= 0;
 							state <= END;
@@ -167,15 +179,22 @@ module practice( input [2:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 					end
 					
 					END:  //show END and
-					begin		
-						seg7Out <= ENDSHOW;
+					begin
+						if (seg7Out == ENDSHOW)
+							begin
+								seg7Out <= level;
+							end
+						else
+							begin
+								seg7Out <= ENDSHOW;
+							end
 						endEnable <= 1;
 						lighting <= 4'b1111;
 					end
 					
 					BURN:
 					begin
-						if(total ==11)
+						if(total ==10)
 							begin
 								state <= END;
 							end
@@ -202,7 +221,7 @@ module practice( input [2:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 					
 					APPLY:
 						begin
-						seg7Out <= lastchange;
+						seg7Out <= level;
 						in <=0;
 							if (lastchange != 15) //recieve SWs is not default
 								begin
@@ -218,6 +237,7 @@ module practice( input [2:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 										begin
 											lighting <= lastchange;
 											iteral <= 0;
+											lighting <= 15;
 											state <= BURN; 
 										end
 								end
@@ -226,18 +246,19 @@ module practice( input [2:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 								begin
 									//lighting <= 7;
 									lightIndex <= 0; //reset leds cache
-									
+									lighting <= 15;
 									state <= GOOD;
 									iteral <= 0;
 								end
-								
+								else
+									begin 
+									end
+									
 							end
 						
 					default:
 						state <= state;
 				endcase
 			end
-			
-		
 	end
 endmodule
