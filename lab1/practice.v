@@ -121,7 +121,6 @@ module practice( input [2:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 								begin
 									if (lightIndex == lightMax) //after 7 of lights
 										begin
-											iteral <= 0;
 											lightIndex <= 0; //from cache 0
 											state <= APPLY; //start to recieve player sw
 											lighting <= 4'b1111;
@@ -162,7 +161,7 @@ module practice( input [2:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 							nextdifficulty <=difficulty; 
 						if (total == 11)
 						begin
-							lightIndex <= 0;
+							//lightIndex <= 0;
 							state <= END;
 						end
 					end
@@ -203,7 +202,7 @@ module practice( input [2:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 					
 					APPLY:
 						begin
-						lighting <= lastchange;
+						seg7Out <= lastchange;
 						in <=0;
 							if (lastchange != 15) //recieve SWs is not default
 								begin
@@ -218,7 +217,7 @@ module practice( input [2:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 									else
 										begin
 											lighting <= lastchange;
-											//iteral <= 0;
+											iteral <= 0;
 											state <= BURN; 
 										end
 								end
@@ -227,8 +226,9 @@ module practice( input [2:0]lastdifficuty , output reg [7:0] seg7Out, output reg
 								begin
 									//lighting <= 7;
 									lightIndex <= 0; //reset leds cache
+									
 									state <= GOOD;
-									//iteral <= 0;
+									iteral <= 0;
 								end
 								
 							end
